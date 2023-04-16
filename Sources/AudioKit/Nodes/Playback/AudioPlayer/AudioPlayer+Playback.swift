@@ -74,10 +74,10 @@ public extension AudioPlayer {
     ///   - time seconds, relative to current playback, to seek by
     func seek(time seekTime: TimeInterval) {
         guard seekTime != 0 else { return }
+
         guard let file = file else { return }
-        
-        let wasPlaying = isPlaying
         let sampleRate = file.fileFormat.sampleRate
+
         let startTime = currentTime + seekTime
         let endTime = editEndTime
 
@@ -89,6 +89,7 @@ public extension AudioPlayer {
 
         let startFrame = AVAudioFramePosition(startTime * sampleRate)
         let endFrame = AVAudioFramePosition(endTime * sampleRate)
+
         let frameCount = AVAudioFrameCount(endFrame - startFrame)
 
         guard frameCount > 0 else {
@@ -96,27 +97,24 @@ public extension AudioPlayer {
             if isLooping { play() }
             return
         }
-        
+
         isSeeking = true
         playerNode.stop()
 
-        if wasPlaying {
-            playerNode.scheduleSegment(
-                file,
-                startingFrame: startFrame,
-                frameCount: frameCount,
-                at: nil,
-                completionCallbackType: .dataPlayedBack
-            ) { _ in
-                self.internalCompletionHandler()
-            }
-            
-            playerNode.play()
-            status = .playing
-            timeBeforePlay = editStartTime - startTime
+        playerNode.scheduleSegment(
+            file,
+            startingFrame: startFrame,
+            frameCount: frameCount,
+            at: nil,
+            completionCallbackType: .dataPlayedBack
+        ) { _ in
+            self.internalCompletionHandler()
         }
-        
+
+        playerNode.play()
+        status = .playing
         isSeeking = false
+        timeBeforePlay = editStartTime - startTime
     }
 
     /// The current playback position, in range [0, 1].
