@@ -100,17 +100,17 @@ public extension AudioPlayer {
         isSeeking = true
         playerNode.stop()
 
-        playerNode.scheduleSegment(
-            file,
-            startingFrame: startFrame,
-            frameCount: frameCount,
-            at: nil,
-            completionCallbackType: .dataPlayedBack
-        ) { _ in
-            self.internalCompletionHandler()
-        }
-
         if wasPlaying {
+            playerNode.scheduleSegment(
+                file,
+                startingFrame: startFrame,
+                frameCount: frameCount,
+                at: nil,
+                completionCallbackType: .dataPlayedBack
+            ) { _ in
+                self.internalCompletionHandler()
+            }
+            
             playerNode.play()
             status = .playing
             timeBeforePlay = editStartTime - startTime
